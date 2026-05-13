@@ -31,9 +31,8 @@ namespace CSG2STL
 			}
 		}
 
-		public Mesh Perturb()
+		public Mesh Perturb(double amount = 0.0000001)
 		{
-			const double amount = 0.0000001;
 			Random rng = new Random();
 			Vector PerturbVertex(Vector p) => new Vector(
 				p.X + (rng.NextDouble() * 2 - 1) * amount,
