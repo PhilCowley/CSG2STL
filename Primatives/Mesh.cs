@@ -215,8 +215,7 @@ namespace CSG2STL
 			return f * edge2.Dot(q) > eps;
 		}
 
-		// ── Splitting ──────────────────────────────────────────────────────────────
-
+		#region Splitting
 		private static (Vector min, Vector max) FacetAABB(Facet f) => (
 			new Vector(Math.Min(f.A.X, Math.Min(f.B.X, f.C.X)),
 			           Math.Min(f.A.Y, Math.Min(f.B.Y, f.C.Y)),
@@ -330,6 +329,8 @@ namespace CSG2STL
 				new Facet(v[(iso + 2) % 3], p1, v[(iso + 1) % 3])
 			};
 		}
+
+		#endregion
 
 		private static int progressCount=0;
 		private static void UpdateProgress()
