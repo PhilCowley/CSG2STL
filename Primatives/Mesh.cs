@@ -18,7 +18,7 @@ namespace CSG2STL
 			w.Write(header);
 			w.Write((uint)Facets.Count);
 
-			foreach (Facet f in Facets)
+			foreach(Facet f in Facets)
 			{
 				Vector n = f.Normal;
 				w.Write((float)n.X); w.Write((float)n.Y); w.Write((float)n.Z);
@@ -40,7 +40,7 @@ namespace CSG2STL
 				p.Z + (rng.NextDouble() * 2 - 1) * amount);
 
 			Mesh result = new Mesh();
-			foreach (Facet f in Facets)
+			foreach(Facet f in Facets)
 				result.Facets.Add(new Facet(PerturbVertex(f.A), PerturbVertex(f.B), PerturbVertex(f.C)));
 			return result;
 		}
@@ -48,7 +48,7 @@ namespace CSG2STL
 		public Mesh Translate(Vector offset)
 		{
 			Mesh result = new Mesh();
-			foreach (Facet f in Facets)
+			foreach(Facet f in Facets)
 				result.Facets.Add(new Facet(f.A + offset, f.B + offset, f.C + offset));
 			return result;
 		}
@@ -76,7 +76,7 @@ namespace CSG2STL
 			}
 
 			Mesh result = new Mesh();
-			foreach (Facet f in Facets)
+			foreach(Facet f in Facets)
 				result.Facets.Add(new Facet(RotateVertex(f.A), RotateVertex(f.B), RotateVertex(f.C)));
 			return result;
 		}
@@ -86,7 +86,7 @@ namespace CSG2STL
 		public Mesh Scale(Vector factor)
 		{
 			Mesh result = new Mesh();
-			foreach (Facet f in Facets)
+			foreach(Facet f in Facets)
 				result.Facets.Add(new Facet(
 					new Vector(f.A.X * factor.X, f.A.Y * factor.Y, f.A.Z * factor.Z),
 					new Vector(f.B.X * factor.X, f.B.Y * factor.Y, f.B.Z * factor.Z),
@@ -150,17 +150,17 @@ namespace CSG2STL
 		private (Vector min, Vector max)? _aabb;
 		private (Vector min, Vector max) GetAABB()
 		{
-			if (_aabb == null)
+			if(_aabb == null)
 			{
 				double minX = double.MaxValue, minY = double.MaxValue, minZ = double.MaxValue;
 				double maxX = double.MinValue, maxY = double.MinValue, maxZ = double.MinValue;
-				foreach (Facet f in Facets)
+				foreach(Facet f in Facets)
 				{
-					foreach (Vector v in new[] { f.A, f.B, f.C })
+					foreach(Vector v in new[] { f.A, f.B, f.C })
 					{
-						if (v.X < minX) minX = v.X; if (v.X > maxX) maxX = v.X;
-						if (v.Y < minY) minY = v.Y; if (v.Y > maxY) maxY = v.Y;
-						if (v.Z < minZ) minZ = v.Z; if (v.Z > maxZ) maxZ = v.Z;
+						if(v.X < minX) minX = v.X; if(v.X > maxX) maxX = v.X;
+						if(v.Y < minY) minY = v.Y; if(v.Y > maxY) maxY = v.Y;
+						if(v.Z < minZ) minZ = v.Z; if(v.Z > maxZ) maxZ = v.Z;
 					}
 				}
 				_aabb = (new Vector(minX, minY, minZ), new Vector(maxX, maxY, maxZ));
@@ -173,24 +173,24 @@ namespace CSG2STL
 			// Fast AABB pre-reject — if the point is outside the bounding box it
 			// cannot be inside the mesh, so skip all three ray casts entirely.
 			var (min, max) = GetAABB();
-			if (point.X < min.X || point.X > max.X ||
-			    point.Y < min.Y || point.Y > max.Y ||
-			    point.Z < min.Z || point.Z > max.Z) return false;
+			if(point.X < min.X || point.X > max.X ||
+					point.Y < min.Y || point.Y > max.Y ||
+					point.Z < min.Z || point.Z > max.Z) return false;
 
 			// Three off-axis rays; majority vote guards against rays that graze
 			// through edges or vertices, which flip parity and give wrong results.
 			int votes = 0;
-			if (CountRayHits(point, new Vector(1.00000, 0.00031, 0.00053)) % 2 == 1) votes++;
-			if (CountRayHits(point, new Vector(0.00031, 1.00000, 0.00071)) % 2 == 1) votes++;
-			if (CountRayHits(point, new Vector(0.00053, 0.00071, 1.00000)) % 2 == 1) votes++;
+			if(CountRayHits(point, new Vector(1.00000, 0.00031, 0.00053)) % 2 == 1) votes++;
+			if(CountRayHits(point, new Vector(0.00031, 1.00000, 0.00071)) % 2 == 1) votes++;
+			if(CountRayHits(point, new Vector(0.00053, 0.00071, 1.00000)) % 2 == 1) votes++;
 			return votes >= 2;
 		}
 
 		private int CountRayHits(Vector origin, Vector dir)
 		{
 			int count = 0;
-			foreach (Facet f in Facets)
-				if (RayIntersectsTriangle(origin, dir, f))
+			foreach(Facet f in Facets)
+				if(RayIntersectsTriangle(origin, dir, f))
 					count++;
 			return count;
 		}
@@ -204,25 +204,25 @@ namespace CSG2STL
 			Vector edge2 = tri.C - tri.A;
 			Vector h = dir.Cross(edge2);
 			double a = edge1.Dot(h);
-			if (Math.Abs(a) < eps) return false;
+			if(Math.Abs(a) < eps) return false;
 			double f = 1.0 / a;
 			Vector s = origin - tri.A;
 			double u = f * s.Dot(h);
-			if (u < 0 || u > 1) return false;
+			if(u < 0 || u > 1) return false;
 			Vector q = s.Cross(edge1);
 			double v = f * dir.Dot(q);
-			if (v < 0 || u + v > 1) return false;
+			if(v < 0 || u + v > 1) return false;
 			return f * edge2.Dot(q) > eps;
 		}
 
 		#region Splitting
 		private static (Vector min, Vector max) FacetAABB(Facet f) => (
 			new Vector(Math.Min(f.A.X, Math.Min(f.B.X, f.C.X)),
-			           Math.Min(f.A.Y, Math.Min(f.B.Y, f.C.Y)),
-			           Math.Min(f.A.Z, Math.Min(f.B.Z, f.C.Z))),
+								 Math.Min(f.A.Y, Math.Min(f.B.Y, f.C.Y)),
+								 Math.Min(f.A.Z, Math.Min(f.B.Z, f.C.Z))),
 			new Vector(Math.Max(f.A.X, Math.Max(f.B.X, f.C.X)),
-			           Math.Max(f.A.Y, Math.Max(f.B.Y, f.C.Y)),
-			           Math.Max(f.A.Z, Math.Max(f.B.Z, f.C.Z))));
+								 Math.Max(f.A.Y, Math.Max(f.B.Y, f.C.Y)),
+								 Math.Max(f.A.Z, Math.Max(f.B.Z, f.C.Z))));
 
 		private static bool AABBOverlap(
 			(Vector min, Vector max) a,
@@ -236,18 +236,18 @@ namespace CSG2STL
 		{
 			// Precompute cutter AABBs once — reused for every triangle in the inner loop.
 			var cutterBoxes = new (Vector min, Vector max)[cutters.Count];
-			for (int i = 0; i < cutters.Count; i++)
+			for(int i = 0; i < cutters.Count; i++)
 				cutterBoxes[i] = FacetAABB(cutters[i]);
 
 			List<Facet> result = new List<Facet>(toSplit);
-			for (int ci = 0; ci < cutters.Count; ci++)
+			for(int ci = 0; ci < cutters.Count; ci++)
 			{
 				Facet cutter = cutters[ci];
 				var cbox = cutterBoxes[ci];
 				List<Facet> next = new List<Facet>(result.Count);
-				foreach (Facet tri in result)
+				foreach(Facet tri in result)
 				{
-					if (AABBOverlap(FacetAABB(tri), cbox))
+					if(AABBOverlap(FacetAABB(tri), cbox))
 						next.AddRange(SplitByFacet(tri, cutter));
 					else
 						next.Add(tri);
@@ -272,27 +272,27 @@ namespace CSG2STL
 			double cd = cn.Dot(cutter.A);
 			Vector[] tv = { tri.A, tri.B, tri.C };
 			double[] d = { cn.Dot(tv[0]) - cd, cn.Dot(tv[1]) - cd, cn.Dot(tv[2]) - cd };
-			int[]    s = { d[0] > eps ? 1 : d[0] < -eps ? -1 : 0,
-			               d[1] > eps ? 1 : d[1] < -eps ? -1 : 0,
-			               d[2] > eps ? 1 : d[2] < -eps ? -1 : 0 };
+			int[] s = { d[0] > eps ? 1 : d[0] < -eps ? -1 : 0,
+										 d[1] > eps ? 1 : d[1] < -eps ? -1 : 0,
+										 d[2] > eps ? 1 : d[2] < -eps ? -1 : 0 };
 
 			// All vertices on the same side (or on the plane) → nothing to split
-			if (s[0] >= 0 && s[1] >= 0 && s[2] >= 0) return single;
-			if (s[0] <= 0 && s[1] <= 0 && s[2] <= 0) return single;
+			if(s[0] >= 0 && s[1] >= 0 && s[2] >= 0) return single;
+			if(s[0] <= 0 && s[1] <= 0 && s[2] <= 0) return single;
 
 			// Find the two edges that cross strictly from one side to the other
 			var cross = new List<(Vector p, int e)>(2);
-			for (int i = 0; i < 3; i++)
+			for(int i = 0; i < 3; i++)
 			{
 				int j = (i + 1) % 3;
-				if (s[i] * s[j] < 0) // strictly opposite sides
+				if(s[i] * s[j] < 0) // strictly opposite sides
 				{
 					double t = d[i] / (d[i] - d[j]);
 					cross.Add((tv[i] + (tv[j] - tv[i]) * t, i));
 				}
 			}
 
-			if (cross.Count != 2) return single;
+			if(cross.Count != 2) return single;
 
 			return SplitTriangle(tri, cross[0].p, cross[0].e, cross[1].p, cross[1].e);
 		}
@@ -308,7 +308,7 @@ namespace CSG2STL
 		private static List<Facet> SplitTriangle(Facet tri, Vector p0, int pe, Vector p1, int qe)
 		{
 			// Normalise reverse-adjacent pairs → canonical
-			if ((pe == 1 && qe == 0) || (pe == 2 && qe == 1) || (pe == 0 && qe == 2))
+			if((pe == 1 && qe == 0) || (pe == 2 && qe == 1) || (pe == 0 && qe == 2))
 			{
 				(p0, p1) = (p1, p0);
 				(pe, qe) = (qe, pe);
@@ -317,8 +317,8 @@ namespace CSG2STL
 			// iso  = the isolated vertex (shared by the two cut edges)
 			// Formula holds for all three canonical cases:
 			//   (0,1)→iso=1  (1,2)→iso=2  (2,0)→iso=0
-			Vector[] v  = { tri.A, tri.B, tri.C };
-			int     iso = (pe + 1) % 3;
+			Vector[] v = { tri.A, tri.B, tri.C };
+			int iso = (pe + 1) % 3;
 
 			return new List<Facet>
 			{
@@ -332,7 +332,7 @@ namespace CSG2STL
 
 		#endregion
 
-		private static int progressCount=0;
+		private static int progressCount = 0;
 		private static void UpdateProgress()
 		{
 			if(progressCount++ > 1000)

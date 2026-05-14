@@ -57,6 +57,10 @@ CSG2STL supports various geometric primitives. Each is a special case of a gener
 		Creates a frustum by defining its base center, base radius, top center, and top radius.\
 		For example:
 		```Mesh f = new Frustum(new Vector(0, 0, 0), 1, new Vector(0, 0, 1), 0.5);```
+- **Plane**\
+		Creates a plane by defining a point on the plane and the normal at that point.\
+		For example:
+		```Mesh p = new Plane(new Vector(), new Vector(0, 1, 0));```
 
 ## CSG Operations
 - **Union**\
@@ -103,7 +107,11 @@ CSG2STL supports various geometric primitives. Each is a special case of a gener
 		As well as being a parameter for the geometric primitives and transformations, the Vector class also provides various 
 		utility methods for vector operations, such as addition, subtraction, scaling, and normalization. It also provides functions for calculating
 		vector and scalar producsts, as well as methods for rotating vectors around different axes. 
-- **Mesh**\		  Represents a 3D mesh object that can be manipulated using CSG operations and modifiers.\		The base c;lass for all the primitives and the result of CSG operations is the Mesh class, which provides a common interface for working 		with the geometry of the models.- **Facet**\
+- **Mesh**\	
+	  Represents a 3D mesh object that can be manipulated using CSG operations and modifiers.\
+		The base c;lass for all the primitives and the result of CSG operations is the Mesh class, which provides a common interface for working 
+		with the geometry of the models.
+- **Facet**\
 		Represents a single triangular facet of a mesh, defined by three vertices and a normal vector.\
 		While it is used extensively within the code, it is not generally used directly by users of the CSG2STL tool. Instead, users typically 
 		work with the geometric primitives and CSG operations to create their models, and the Mesh class is used internally to represent the 
