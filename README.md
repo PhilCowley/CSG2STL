@@ -4,7 +4,7 @@ format, which is widely used for 3D printing and computer-aided design (CAD).
 
 ## About
 CSG2STL grew out of a wish to use the excellent POVRay softare to create models for 3D printing. However, POVRay's 
-CSG capabilities are limited and not suitable for complex models. CSG2STL allows users to define their models using 
+CSG capabilities and not suitable for complex organic models such as organic forms, but is extremely suitable for engineering models. CSG2STL allows users to define their models using 
 a more flexible CSG library in C#, and then export them as STL files for 3D printing.
 
 As a software developer, my mind works in code and I've always struggled with visual modeling tools. CSG2STL allows 
