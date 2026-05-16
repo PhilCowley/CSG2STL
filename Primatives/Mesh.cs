@@ -168,6 +168,9 @@ namespace CSG2STL
 			return _aabb.Value;
 		}
 
+		public Vector Min() => GetAABB().min;
+		public Vector Max() => GetAABB().max;
+
 		private bool Contains(Vector point)
 		{
 			// Fast AABB pre-reject — if the point is outside the bounding box it
