@@ -85,12 +85,17 @@ namespace CSG2STL
 
 		public Mesh Scale(Vector factor)
 		{
+			// A negative determinant (odd number of negative factors) mirrors the mesh,
+			// reversing winding order. Swap B↔C to keep normals pointing outward.
+			bool flip = factor.X * factor.Y * factor.Z < 0;
 			Mesh result = new Mesh();
 			foreach(Facet f in Facets)
-				result.Facets.Add(new Facet(
-					new Vector(f.A.X * factor.X, f.A.Y * factor.Y, f.A.Z * factor.Z),
-					new Vector(f.B.X * factor.X, f.B.Y * factor.Y, f.B.Z * factor.Z),
-					new Vector(f.C.X * factor.X, f.C.Y * factor.Y, f.C.Z * factor.Z)));
+			{
+				var a = new Vector(f.A.X * factor.X, f.A.Y * factor.Y, f.A.Z * factor.Z);
+				var b = new Vector(f.B.X * factor.X, f.B.Y * factor.Y, f.B.Z * factor.Z);
+				var c = new Vector(f.C.X * factor.X, f.C.Y * factor.Y, f.C.Z * factor.Z);
+				result.Facets.Add(flip ? new Facet(a, c, b) : new Facet(a, b, c));
+			}
 			return result;
 		}
 
