@@ -114,7 +114,7 @@ namespace CSG2STL
 			result.Facets.AddRange(splitB.AsParallel().Where(f => this.Contains(Centroid(f))).Select(f => f.Flipped));
 
 			Console.WriteLine();
-			return result;
+			return result.Weld();
 		}
 
 		public Mesh Intersection(Mesh other)
@@ -130,7 +130,7 @@ namespace CSG2STL
 			result.Facets.AddRange(splitB.AsParallel().Where(f => this.Contains(Centroid(f))));
 
 			Console.WriteLine();
-			return result;
+			return result.Weld();
 		}
 
 		public Mesh Union(Mesh other)
@@ -146,6 +146,45 @@ namespace CSG2STL
 			result.Facets.AddRange(splitB.AsParallel().Where(f => !this.Contains(Centroid(f))));
 
 			Console.WriteLine();
+			return result.Weld();
+		}
+
+		// Merges vertices within epsilon of each other and removes any degenerate
+		// triangles that result. Fixes the hairline seam gaps that CSG splitting
+		// leaves due to floating-point imprecision, producing a manifold mesh.
+		public Mesh Weld(double epsilon = 1e-6)
+		{
+			var allVerts = new List<Vector>(Facets.Count * 3);
+			foreach(var f in Facets) { allVerts.Add(f.A); allVerts.Add(f.B); allVerts.Add(f.C); }
+
+			// Snap each vertex to a grid cell of size epsilon, then use the cell
+			// key as a dictionary lookup — O(n) and handles arbitrarily large meshes.
+			var grid = new Dictionary<(long, long, long), int>();
+			var unique = new List<Vector>();
+			var canonical = new int[allVerts.Count];
+
+			for(int i = 0; i < allVerts.Count; i++)
+			{
+				var v = allVerts[i];
+				var key = ((long)Math.Round(v.X / epsilon),
+				           (long)Math.Round(v.Y / epsilon),
+				           (long)Math.Round(v.Z / epsilon));
+				if(!grid.TryGetValue(key, out int idx))
+				{
+					idx = unique.Count;
+					grid[key] = idx;
+					unique.Add(v);
+				}
+				canonical[i] = idx;
+			}
+
+			var result = new Mesh();
+			for(int i = 0; i < Facets.Count; i++)
+			{
+				int ia = canonical[i * 3], ib = canonical[i * 3 + 1], ic = canonical[i * 3 + 2];
+				if(ia == ib || ib == ic || ia == ic) continue; // degenerate after weld
+				result.Facets.Add(new Facet(unique[ia], unique[ib], unique[ic]));
+			}
 			return result;
 		}
 
