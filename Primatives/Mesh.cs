@@ -184,6 +184,11 @@ namespace CSG2STL
 		{
 			Console.Write("Difference() .");
 
+			if(this.Facets.Count == 0)
+				return other;
+			if(other.Facets.Count == 0)
+				return this;
+
 			List<Facet> splitA = SplitAgainst(this.Facets, other.Facets);
 			List<Facet> splitB = SplitAgainst(other.Facets, this.Facets);
 
@@ -202,6 +207,11 @@ namespace CSG2STL
 		{
 			Console.Write("Intersection() .");
 
+			if(this.Facets.Count == 0)
+				return other;
+			if(other.Facets.Count == 0)
+				return this;
+
 			List<Facet> splitA = SplitAgainst(this.Facets, other.Facets);
 			List<Facet> splitB = SplitAgainst(other.Facets, this.Facets);
 
@@ -217,6 +227,11 @@ namespace CSG2STL
 		public Mesh Union(Mesh other)
 		{
 			Console.Write("Union() .");
+
+			if(this.Facets.Count == 0)
+				return other;
+			if(other.Facets.Count == 0)
+				return this;
 
 			List<Facet> splitA = SplitAgainst(this.Facets, other.Facets);
 			List<Facet> splitB = SplitAgainst(other.Facets, this.Facets);
@@ -469,5 +484,7 @@ namespace CSG2STL
 				progressCount = 0;
 			}
 		}
+
+		public override string ToString() => $"Mesh with {Facets.Count} facets";
 	}
 }

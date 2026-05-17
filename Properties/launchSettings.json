@@ -2,7 +2,7 @@
   "profiles": {
     "CSG2STL": {
       "commandName": "Project",
-      "commandLineArgs": "Examples\\KeyFob.csx",
+      "commandLineArgs": "Examples\\cuff.csx",
       "workingDirectory": "D:\\Projects\\CSG2STL"
     }
   }

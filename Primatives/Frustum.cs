@@ -5,8 +5,11 @@ namespace CSG2STL
 	public class Frustum : Mesh
 	{
 		public Frustum(Vector start, double startRadius, Vector end, double endRadius, int segments = 32)
+			: this(start, new Vector(startRadius, startRadius, 0), end, new Vector(endRadius, endRadius, 0), segments) { }
+
+		public Frustum(Vector start, Vector startRadius, Vector end, Vector endRadius, int segments = 32)
 		{
-			Console.WriteLine("Frustum(" + start.ToString(), ", " + startRadius.ToString() + ", " + end.ToString() + ", " + endRadius.ToString() + ", " + segments.ToString() + ")");
+			Console.WriteLine("Frustum(" + start.ToString() + ", " + startRadius.ToString() + ", " + end.ToString() + ", " + endRadius.ToString() + ", " + segments.ToString() + ")");
 
 			Vector axis = end - start;
 
@@ -26,8 +29,8 @@ namespace CSG2STL
 				double cos = Math.Cos(angle);
 				double sin = Math.Sin(angle);
 
-				ring0[i] = start + u * (cos * startRadius) + v * (sin * startRadius);
-				ring1[i] = end   + u * (cos * endRadius)   + v * (sin * endRadius);
+				ring0[i] = start + u * (cos * startRadius.X) + v * (sin * startRadius.Y);
+				ring1[i] = end   + u * (cos * endRadius.X)   + v * (sin * endRadius.Y);
 			}
 
 			for (int i = 0; i < segments; i++)

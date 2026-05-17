@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace CSG2STL
 {
-	internal class Sphere : Mesh
+	public class Sphere : Mesh
 	{
 		public Sphere(Vector centre, double radius, int stacks = 16, int slices = 32)
 		{
