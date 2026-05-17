@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Text;
 
 namespace CSG2STL
 {
@@ -29,6 +31,85 @@ namespace CSG2STL
 
 				w.Write((ushort)0);
 			}
+		}
+
+		public void Export3MF(string filename)
+		{
+			// Build an indexed vertex/triangle list — deduplicate vertices with a tight epsilon snap.
+			const double eps = 1e-8;
+			var vertices = new List<Vector>();
+			var vertexIndex = new Dictionary<(long, long, long), int>();
+			var triangles = new List<(int, int, int)>();
+
+			int GetOrAdd(Vector v)
+			{
+				var key = ((long)Math.Round(v.X / eps),
+				           (long)Math.Round(v.Y / eps),
+				           (long)Math.Round(v.Z / eps));
+				if(!vertexIndex.TryGetValue(key, out int idx))
+				{
+					idx = vertices.Count;
+					vertexIndex[key] = idx;
+					vertices.Add(v);
+				}
+				return idx;
+			}
+
+			foreach(Facet f in Facets)
+			{
+				int ia = GetOrAdd(f.A), ib = GetOrAdd(f.B), ic = GetOrAdd(f.C);
+				if(ia != ib && ib != ic && ia != ic)
+					triangles.Add((ia, ib, ic));
+			}
+
+			// [Content_Types].xml
+			const string contentTypes =
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">" +
+				"<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" +
+				"<Default Extension=\"model\" ContentType=\"application/vnd.ms-package.3dmanufacturing-3dmodel+xml\"/>" +
+				"</Types>";
+
+			// _rels/.rels
+			const string rels =
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
+				"<Relationship Target=\"/3D/3dmodel.model\" Id=\"rel0\" " +
+				"Type=\"http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel\"/>" +
+				"</Relationships>";
+
+			// 3D/3dmodel.model — build with StringBuilder for large meshes
+			var sb = new StringBuilder();
+			sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+			sb.Append("<model unit=\"millimeter\" xml:lang=\"en-US\" xmlns=\"http://schemas.microsoft.com/3dmanufacturing/core/2015/02\">");
+			sb.Append("<resources><object id=\"1\" type=\"model\"><mesh>");
+
+			sb.Append("<vertices>");
+			foreach(var v in vertices)
+				sb.Append($"<vertex x=\"{v.X:G8}\" y=\"{v.Y:G8}\" z=\"{v.Z:G8}\"/>");
+			sb.Append("</vertices>");
+
+			sb.Append("<triangles>");
+			foreach(var (v1, v2, v3) in triangles)
+				sb.Append($"<triangle v1=\"{v1}\" v2=\"{v2}\" v3=\"{v3}\"/>");
+			sb.Append("</triangles>");
+
+			sb.Append("</mesh></object></resources>");
+			sb.Append("<build><item objectid=\"1\"/></build>");
+			sb.Append("</model>");
+
+			using var stream = File.Open(filename, FileMode.Create);
+			using var zip = new ZipArchive(stream, ZipArchiveMode.Create);
+			WriteZipEntry(zip, "[Content_Types].xml", contentTypes);
+			WriteZipEntry(zip, "_rels/.rels", rels);
+			WriteZipEntry(zip, "3D/3dmodel.model", sb.ToString());
+		}
+
+		private static void WriteZipEntry(ZipArchive zip, string entryName, string content)
+		{
+			var entry = zip.CreateEntry(entryName, CompressionLevel.Optimal);
+			using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+			writer.Write(content);
 		}
 
 		public Mesh Perturb(double amount = 0.0000001)
