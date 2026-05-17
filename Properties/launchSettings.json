@@ -2,7 +2,7 @@
   "profiles": {
     "CSG2STL": {
       "commandName": "Project",
-      "commandLineArgs": "Examples\\OA-OAKv2_replacement.csx",
+      "commandLineArgs": "Examples\\KeyFob.csx",
       "workingDirectory": "D:\\Projects\\CSG2STL"
     }
   }

@@ -152,7 +152,7 @@ namespace CSG2STL
 		// Merges vertices within epsilon of each other and removes any degenerate
 		// triangles that result. Fixes the hairline seam gaps that CSG splitting
 		// leaves due to floating-point imprecision, producing a manifold mesh.
-		public Mesh Weld(double epsilon = 1e-6)
+		public Mesh Weld(double epsilon = 1e-3)
 		{
 			var allVerts = new List<Vector>(Facets.Count * 3);
 			foreach(var f in Facets) { allVerts.Add(f.A); allVerts.Add(f.B); allVerts.Add(f.C); }
